@@ -1,2 +1,13 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+My filter=lfs diff=lfs merge=lfs -text
+project filter=lfs diff=lfs merge=lfs -text
+(2)/Assets/CartoonTracksPack1/Track1/Textures/road.psd filter=lfs diff=lfs merge=lfs -text
+My[[:space:]]project[[:space:]](2)/Assets/CartoonTracksPack1/Track1/Textures/road.psd filter=lfs diff=lfs merge=lfs -text
+My[[:space:]]project[[:space:]](2)/Assets/CartoonTracksPack1/Track1/Textures/road_normal.png filter=lfs diff=lfs merge=lfs -text
+(2)/Library/ArtifactDB filter=lfs diff=lfs merge=lfs -text
+My[[:space:]]project[[:space:]](2)/Library/ArtifactDB filter=lfs diff=lfs merge=lfs -text
+My[[:space:]]project[[:space:]](2)/Library/Artifacts/11/113ecd13f1bd2be22030e7060942f3cb filter=lfs diff=lfs merge=lfs -text
+My[[:space:]]project[[:space:]](2)/Library/Artifacts/7f/7fa97e4e19c54c2b063856f159ca1c04 filter=lfs diff=lfs merge=lfs -text
+My[[:space:]]project[[:space:]](2)/Library/PackageCache/com.unity.burst@07790c2d06d9/.Runtime/libburst-llvm-19.dylib filter=lfs diff=lfs merge=lfs -text
+My[[:space:]]project[[:space:]](2)/Library/Search/98957a664bd18c47a3e41b2a0189ef53.SearchIndexArtifactImporter.196609.f.index filter=lfs diff=lfs merge=lfs -text

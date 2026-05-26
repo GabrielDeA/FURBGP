@@ -1,0 +1,10 @@
+﻿<Solution>
+  <Project Path="KartGame.csproj" />
+  <Project Path="Unity.Microgame.Tutorials.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="KartGame.AI.Editor.csproj" />
+  <Project Path="KartGame.AI.csproj" />
+  <Project Path="Unity.Karting.Tutorials.csproj" />
+  <Project Path="KartGame.Editor.csproj" />
+</Solution>
