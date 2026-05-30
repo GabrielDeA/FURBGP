@@ -1,4 +1,5 @@
 using UnityEngine;
+using static LogitechGSDK;
 
 public class GiraVolante : MonoBehaviour
 {
@@ -10,16 +11,37 @@ public class GiraVolante : MonoBehaviour
 
     void Start()
     {
+        bool ok = LogitechGSDK.LogiSteeringInitialize(false);
+        Debug.Log("Logitech Init: " + ok);
+
         rotacaoInicial = transform.localRotation;
         posicaoInicial = transform.localPosition;
     }
 
     void Update()
     {
-        float entrada = Input.GetAxis("Horizontal");
+        float entrada = 0f;
+
+        // Verifica se há um volante Logitech conectado
+        if (LogitechGSDK.LogiUpdate() &&
+            LogitechGSDK.LogiIsConnected(0))
+        {
+            DIJOYSTATE2ENGINES estado =
+                LogitechGSDK.LogiGetStateCSharp(0);
+
+            // lX varia de -32768 a 32767
+            entrada = estado.lX / 32767f;
+        }
+        else
+        {
+            // Fallback para teclado
+            entrada = Input.GetAxis("Horizontal");
+        }
+
         float angulo = entrada * anguloMaximo;
 
-        Quaternion rotacaoAlvo = rotacaoInicial * Quaternion.AngleAxis(angulo, Vector3.forward);
+        Quaternion rotacaoAlvo =
+            rotacaoInicial * Quaternion.AngleAxis(angulo, Vector3.forward);
 
         transform.localRotation = Quaternion.Lerp(
             transform.localRotation,
@@ -28,5 +50,10 @@ public class GiraVolante : MonoBehaviour
         );
 
         transform.localPosition = posicaoInicial;
+    }
+
+    void OnApplicationQuit()
+    {
+        LogitechGSDK.LogiSteeringShutdown();
     }
 }
