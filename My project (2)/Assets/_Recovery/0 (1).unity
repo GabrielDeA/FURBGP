@@ -977,9 +977,10 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 24b3fd52e94d5b143aacd3c45242f5c3, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraVolante
+  m_EditorClassIdentifier: Assembly-CSharp::CameraDoCarro
   sensibilidadeMouse: 2
   limiteVertical: 80
+  forcarModo: 1
   modoForcado: 2
 --- !u!1001 &636193703
 PrefabInstance:
