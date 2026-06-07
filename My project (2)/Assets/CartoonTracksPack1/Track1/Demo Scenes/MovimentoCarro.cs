@@ -10,6 +10,11 @@ public class MovimentoCarro : MonoBehaviour
     public float resistencia = 20f;
     public float velocidadeCurva = 100f;
 
+    [Header("Alinhamento do carro")]
+    public float velocidadeAlinhamento = 15f; 
+    public float distanciaDoChao = 2.0f;
+    public LayerMask camadaDaPista;          
+
     [Header("Audio")]
     [Range(0f, 1f)] public float volumeMotor = 0.9f;
     [Range(0f, 1f)] public float volumeDesaceleracao = 0.45f;
@@ -35,7 +40,9 @@ public class MovimentoCarro : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true;
+    
+        rb.freezeRotation = true; 
+        
         CriarAudio();
     }
 
@@ -64,28 +71,43 @@ public class MovimentoCarro : MonoBehaviour
 
         velocidadeAtual = Mathf.Clamp(velocidadeAtual, 0f, velocidadeMaxima);
 
-        Vector3 movimento = transform.forward * velocidadeAtual;
-        rb.linearVelocity = new Vector3(movimento.x, rb.linearVelocity.y, movimento.z);
-
         if (velocidadeAtual > 0.1f)
         {
+            float fatorVelocidade = velocidadeAtual / velocidadeMaxima;
             float rotacao = direcao * velocidadeCurva * Time.fixedDeltaTime;
-            rb.MoveRotation(rb.rotation * Quaternion.Euler(0f, rotacao, 0f));
+            
+            transform.Rotate(transform.up, rotacao, Space.World);
+        }
+
+        AlinharCarro();
+
+        Vector3 movimentoDirecionado = transform.forward * velocidadeAtual;
+        
+        rb.linearVelocity = movimentoDirecionado; 
+    }
+
+    void AlinharCarro()
+    {
+        RaycastHit hit;
+
+        if (Physics.Raycast(transform.position, -transform.up, out hit, distanciaDoChao, camadaDaPista))
+        {
+            Quaternion rotacaoAlvo = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
+            transform.rotation = Quaternion.Slerp(transform.rotation, rotacaoAlvo, velocidadeAlinhamento * Time.fixedDeltaTime);
+        }
+        else
+        {
+            Quaternion rotacaoReta = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+            transform.rotation = Quaternion.Slerp(transform.rotation, rotacaoReta, 2f * Time.fixedDeltaTime);
         }
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        if (impactSource == null || impactSource.clip == null)
-        {
-            return;
-        }
+        if (impactSource == null || impactSource.clip == null) return;
 
         float intensidade = collision.relativeVelocity.magnitude;
-        if (intensidade < impactoMinimo)
-        {
-            return;
-        }
+        if (intensidade < impactoMinimo) return;
 
         float blend = Mathf.InverseLerp(impactoMinimo, impactoMaximo, intensidade);
         float volume = Mathf.Lerp(0.1f, volumeImpacto, blend);
@@ -114,10 +136,7 @@ public class MovimentoCarro : MonoBehaviour
         float speedRatio = velocidadeMaxima > 0.01f ? Mathf.Clamp01(velocidadeAtual / velocidadeMaxima) : 0f;
         float blend = 1f - Mathf.Exp(-respostaAudio * Time.deltaTime);
 
-        float lowVolume = 0f;
-        float midVolume = 0f;
-        float highVolume = 0f;
-        float decelVolume = 0f;
+        float lowVolume = 0f; float midVolume = 0f; float highVolume = 0f; float decelVolume = 0f;
 
         if (speedRatio > 0.02f || throttle > 0.05f)
         {
@@ -136,65 +155,33 @@ public class MovimentoCarro : MonoBehaviour
     private AudioSource CriarLoop(string nome, string resourcePath)
     {
         AudioClip clip = Resources.Load<AudioClip>(resourcePath);
-        if (clip == null)
-        {
-            Debug.LogWarning("MovimentoCarro nao encontrou clip em: " + resourcePath, this);
-            return null;
-        }
+        if (clip == null) return null;
 
         GameObject child = new GameObject(nome);
         child.transform.SetParent(transform, false);
 
         AudioSource source = child.AddComponent<AudioSource>();
-        source.clip = clip;
-        source.loop = true;
-        source.playOnAwake = false;
-        source.spatialBlend = 0f;
-        source.volume = 0f;
-        source.pitch = 1f;
-        source.ignoreListenerPause = true;
-        source.dopplerLevel = 0f;
-        source.priority = 32;
-        source.Play();
+        source.clip = clip; source.loop = true; source.spatialBlend = 0f; source.volume = 0f;
         return source;
     }
 
     private AudioSource CriarOneShot(string nome, string resourcePath)
     {
         AudioClip clip = Resources.Load<AudioClip>(resourcePath);
-        if (clip == null)
-        {
-            Debug.LogWarning("MovimentoCarro nao encontrou clip de impacto em: " + resourcePath, this);
-            return null;
-        }
+        if (clip == null) return null;
 
         GameObject child = new GameObject(nome);
         child.transform.SetParent(transform, false);
 
         AudioSource source = child.AddComponent<AudioSource>();
-        source.clip = clip;
-        source.loop = false;
-        source.playOnAwake = false;
-        source.spatialBlend = 0f;
-        source.volume = 1f;
-        source.pitch = 1f;
-        source.ignoreListenerPause = true;
-        source.dopplerLevel = 0f;
-        source.priority = 24;
+        source.clip = clip; source.loop = false; source.spatialBlend = 0f; source.volume = 1f;
         return source;
     }
 
     private void AtualizarFonte(AudioSource source, float targetVolume, float targetPitch, float blend)
     {
-        if (source == null)
-        {
-            return;
-        }
-
-        if (source.clip != null && !source.isPlaying)
-        {
-            source.Play();
-        }
+        if (source == null) return;
+        if (source.clip != null && !source.isPlaying) source.Play();
 
         source.volume = Mathf.Lerp(source.volume, Mathf.Clamp01(targetVolume), blend);
         source.pitch = Mathf.Lerp(source.pitch, targetPitch, blend);

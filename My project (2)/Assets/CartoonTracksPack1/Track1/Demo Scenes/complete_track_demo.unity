@@ -1348,7 +1348,27 @@ PrefabInstance:
     - target: {fileID: 233754579016283196, guid: 28e6efeab80060a44aeb418ac1f92bce,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.92
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 233754579016283196, guid: 28e6efeab80060a44aeb418ac1f92bce,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.32
+      objectReference: {fileID: 0}
+    - target: {fileID: 233754579016283196, guid: 28e6efeab80060a44aeb418ac1f92bce,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9803401
+      objectReference: {fileID: 0}
+    - target: {fileID: 233754579016283196, guid: 28e6efeab80060a44aeb418ac1f92bce,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.19731519
+      objectReference: {fileID: 0}
+    - target: {fileID: 233754579016283196, guid: 28e6efeab80060a44aeb418ac1f92bce,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 22.76
       objectReference: {fileID: 0}
     - target: {fileID: 1694311006334738882, guid: 28e6efeab80060a44aeb418ac1f92bce,
         type: 3}
@@ -2353,8 +2373,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2, y: 1.5, z: 4.5}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 1.7, y: 1.45, z: 4.4}
+  m_Center: {x: 0.0725, y: 0.2, z: 0.32}
 --- !u!23 &1297575433
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2446,6 +2466,11 @@ MonoBehaviour:
   freioForca: 50
   resistencia: 20
   velocidadeCurva: 100
+  velocidadeAlinhamento: 2
+  distanciaDoChao: 1.5
+  camadaDaPista:
+    serializedVersion: 2
+    m_Bits: 2048
   volumeMotor: 0.9
   volumeDesaceleracao: 0.45
   volumeImpacto: 0.5
@@ -5726,8 +5751,18 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 657628949618136669, guid: 0272d5b08108c7543b70c3ccbcd7249c,
         type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 657628949618136669, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
       propertyPath: m_TagString
       value: Pista
+      objectReference: {fileID: 0}
+    - target: {fileID: 1997465519648436586, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 1997465519648436586, guid: 0272d5b08108c7543b70c3ccbcd7249c,
         type: 3}
@@ -5736,13 +5771,43 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2080814552035695874, guid: 0272d5b08108c7543b70c3ccbcd7249c,
         type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 2080814552035695874, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
       propertyPath: m_TagString
       value: Pista
+      objectReference: {fileID: 0}
+    - target: {fileID: 2112596714577886425, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 3564822108431720921, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 3839842156091723747, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 3938809068057682443, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 3938809068057682443, guid: 0272d5b08108c7543b70c3ccbcd7249c,
         type: 3}
       propertyPath: m_TagString
       value: Pista
+      objectReference: {fileID: 0}
+    - target: {fileID: 4471290738519422562, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 4471290738519422562, guid: 0272d5b08108c7543b70c3ccbcd7249c,
         type: 3}
@@ -5804,10 +5869,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5016818807639475386, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 5220192038653060731, guid: 0272d5b08108c7543b70c3ccbcd7249c,
         type: 3}
       propertyPath: m_Name
       value: oval_mod_terrain
+      objectReference: {fileID: 0}
+    - target: {fileID: 5220192038653060731, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 5220192038653060731, guid: 0272d5b08108c7543b70c3ccbcd7249c,
         type: 3}
@@ -5816,18 +5891,58 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5317182980109965636, guid: 0272d5b08108c7543b70c3ccbcd7249c,
         type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 5317182980109965636, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
       propertyPath: m_TagString
       value: Pista
+      objectReference: {fileID: 0}
+    - target: {fileID: 5408019424630358028, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 5408019424630358028, guid: 0272d5b08108c7543b70c3ccbcd7249c,
         type: 3}
       propertyPath: m_TagString
       value: Lombada
       objectReference: {fileID: 0}
+    - target: {fileID: 5429801794782812644, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 7136163183877424819, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 7386018680630746037, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 7584982469430197012, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 7945811166622762229, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 7945811166622762229, guid: 0272d5b08108c7543b70c3ccbcd7249c,
         type: 3}
       propertyPath: m_TagString
       value: Pista
+      objectReference: {fileID: 0}
+    - target: {fileID: 8460521343329377906, guid: 0272d5b08108c7543b70c3ccbcd7249c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 8460521343329377906, guid: 0272d5b08108c7543b70c3ccbcd7249c,
         type: 3}
