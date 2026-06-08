@@ -2469,7 +2469,10 @@ MonoBehaviour:
   velocidadeCurva: 100
   velocidadeAlinhamento: 2
   distanciaDoChao: 1.5
+  alturaSobreChao: 1
   anguloMaximoChao: 55
+  velocidadePrenderNoChao: 10
+  atritoParede: 18
   camadaDaPista:
     serializedVersion: 2
     m_Bits: 2048
