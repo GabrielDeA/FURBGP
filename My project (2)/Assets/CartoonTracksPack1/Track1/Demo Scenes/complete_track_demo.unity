@@ -2462,12 +2462,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovimentoCarro
   velocidadeMaxima: 80
-  aceleracaoForca: 30
+  velocidadeMaximaRe: 25
+  aceleracaoForca: 22
   freioForca: 50
   resistencia: 20
   velocidadeCurva: 100
   velocidadeAlinhamento: 2
   distanciaDoChao: 1.5
+  anguloMaximoChao: 55
   camadaDaPista:
     serializedVersion: 2
     m_Bits: 2048

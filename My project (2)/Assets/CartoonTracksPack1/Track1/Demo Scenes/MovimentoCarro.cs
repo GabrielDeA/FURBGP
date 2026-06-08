@@ -5,7 +5,8 @@ public class MovimentoCarro : MonoBehaviour
 {
     [Header("Movimento")]
     public float velocidadeMaxima = 80f;
-    public float aceleracaoForca = 30f;
+    public float velocidadeMaximaRe = 25f;
+    public float aceleracaoForca = 22f;
     public float freioForca = 50f;
     public float resistencia = 20f;
     public float velocidadeCurva = 100f;
@@ -13,6 +14,7 @@ public class MovimentoCarro : MonoBehaviour
     [Header("Alinhamento do carro")]
     public float velocidadeAlinhamento = 15f; 
     public float distanciaDoChao = 2.0f;
+    public float anguloMaximoChao = 55f;
     public LayerMask camadaDaPista;          
 
     [Header("Audio")]
@@ -31,6 +33,10 @@ public class MovimentoCarro : MonoBehaviour
 
     private Rigidbody rb;
     private float velocidadeAtual;
+    private bool estaNoChao;
+    private bool emColisaoLateral;
+    private Vector3 normalChao = Vector3.up;
+    private Vector3 normalColisaoLateral;
     private AudioSource lowSource;
     private AudioSource midSource;
     private AudioSource highSource;
@@ -56,32 +62,56 @@ public class MovimentoCarro : MonoBehaviour
         float aceleracao = Input.GetAxis("Vertical");
         float direcao = Input.GetAxis("Horizontal");
 
-        if (aceleracao > 0f)
+        if (Mathf.Abs(aceleracao) > 0.01f)
         {
-            velocidadeAtual += aceleracaoForca * Time.fixedDeltaTime;
-        }
-        else if (aceleracao < 0f)
-        {
-            velocidadeAtual -= freioForca * Time.fixedDeltaTime;
+            float velocidadeAlvo = aceleracao > 0f ? velocidadeMaxima : -velocidadeMaximaRe;
+            float forca = aceleracao > 0f ? aceleracaoForca : freioForca;
+            velocidadeAtual = Mathf.MoveTowards(velocidadeAtual, velocidadeAlvo, Mathf.Abs(aceleracao) * forca * Time.fixedDeltaTime);
         }
         else
         {
-            velocidadeAtual -= resistencia * Time.fixedDeltaTime;
+            velocidadeAtual = Mathf.MoveTowards(velocidadeAtual, 0f, resistencia * Time.fixedDeltaTime);
         }
 
-        velocidadeAtual = Mathf.Clamp(velocidadeAtual, 0f, velocidadeMaxima);
+        velocidadeAtual = Mathf.Clamp(velocidadeAtual, -velocidadeMaximaRe, velocidadeMaxima);
 
-        if (velocidadeAtual > 0.1f)
+        if (Mathf.Abs(velocidadeAtual) > 0.1f)
         {
-            float fatorVelocidade = velocidadeAtual / velocidadeMaxima;
-            float rotacao = direcao * velocidadeCurva * Time.fixedDeltaTime;
+            float sentidoDirecao = velocidadeAtual < 0f ? -1f : 1f;
+            float rotacao = direcao * velocidadeCurva * sentidoDirecao * Time.fixedDeltaTime;
             
             transform.Rotate(transform.up, rotacao, Space.World);
         }
 
         AlinharCarro();
 
-        Vector3 movimentoDirecionado = transform.forward * velocidadeAtual;
+        Vector3 direcaoMovimento = Vector3.ProjectOnPlane(transform.forward, normalChao);
+        if (direcaoMovimento.sqrMagnitude < 0.001f)
+        {
+            direcaoMovimento = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
+        }
+
+        direcaoMovimento.Normalize();
+
+        Vector3 movimentoDirecionado = direcaoMovimento * velocidadeAtual;
+
+        if (emColisaoLateral && normalColisaoLateral.sqrMagnitude > 0.001f)
+        {
+            float velocidadeContraParede = Vector3.Dot(movimentoDirecionado, normalColisaoLateral);
+            if (velocidadeContraParede < 0f)
+            {
+                movimentoDirecionado -= normalColisaoLateral * velocidadeContraParede;
+            }
+        }
+
+        if (!estaNoChao)
+        {
+            movimentoDirecionado.y = rb.linearVelocity.y;
+        }
+        else if (emColisaoLateral && movimentoDirecionado.y > 0f)
+        {
+            movimentoDirecionado.y = 0f;
+        }
         
         rb.linearVelocity = movimentoDirecionado; 
     }
@@ -89,21 +119,30 @@ public class MovimentoCarro : MonoBehaviour
     void AlinharCarro()
     {
         RaycastHit hit;
+        estaNoChao = false;
+        normalChao = Vector3.up;
 
-        if (Physics.Raycast(transform.position, -transform.up, out hit, distanciaDoChao, camadaDaPista))
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, distanciaDoChao, camadaDaPista))
         {
-            Quaternion rotacaoAlvo = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
-            transform.rotation = Quaternion.Slerp(transform.rotation, rotacaoAlvo, velocidadeAlinhamento * Time.fixedDeltaTime);
+            float anguloChao = Vector3.Angle(hit.normal, Vector3.up);
+            if (anguloChao <= anguloMaximoChao)
+            {
+                estaNoChao = true;
+                normalChao = hit.normal;
+                Quaternion rotacaoAlvo = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
+                transform.rotation = Quaternion.Slerp(transform.rotation, rotacaoAlvo, velocidadeAlinhamento * Time.fixedDeltaTime);
+                return;
+            }
         }
-        else
-        {
-            Quaternion rotacaoReta = Quaternion.Euler(0, transform.eulerAngles.y, 0);
-            transform.rotation = Quaternion.Slerp(transform.rotation, rotacaoReta, 2f * Time.fixedDeltaTime);
-        }
+
+        Quaternion rotacaoReta = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+        transform.rotation = Quaternion.Slerp(transform.rotation, rotacaoReta, 2f * Time.fixedDeltaTime);
     }
 
     void OnCollisionEnter(Collision collision)
     {
+        AtualizarColisaoLateral(collision);
+
         if (impactSource == null || impactSource.clip == null) return;
 
         float intensidade = collision.relativeVelocity.magnitude;
@@ -114,6 +153,37 @@ public class MovimentoCarro : MonoBehaviour
         float pitch = Mathf.Lerp(1.05f, 0.82f, blend);
         impactSource.pitch = pitch;
         impactSource.PlayOneShot(impactSource.clip, volume);
+    }
+
+    void OnCollisionStay(Collision collision)
+    {
+        AtualizarColisaoLateral(collision);
+    }
+
+    void OnCollisionExit(Collision collision)
+    {
+        emColisaoLateral = false;
+        normalColisaoLateral = Vector3.zero;
+    }
+
+    private void AtualizarColisaoLateral(Collision collision)
+    {
+        Vector3 normalAcumulada = Vector3.zero;
+        int contatosLaterais = 0;
+
+        foreach (ContactPoint contato in collision.contacts)
+        {
+            if (contato.normal.y > 0.45f) continue;
+
+            Vector3 normalLateral = Vector3.ProjectOnPlane(contato.normal, Vector3.up);
+            if (normalLateral.sqrMagnitude < 0.001f) continue;
+
+            normalAcumulada += normalLateral.normalized;
+            contatosLaterais++;
+        }
+
+        emColisaoLateral = contatosLaterais > 0;
+        normalColisaoLateral = emColisaoLateral ? normalAcumulada.normalized : Vector3.zero;
     }
 
     private void CriarAudio()
@@ -132,8 +202,10 @@ public class MovimentoCarro : MonoBehaviour
 
     private void AtualizarAudio()
     {
-        float throttle = Mathf.Clamp01(Input.GetAxis("Vertical"));
-        float speedRatio = velocidadeMaxima > 0.01f ? Mathf.Clamp01(velocidadeAtual / velocidadeMaxima) : 0f;
+        float inputVertical = Input.GetAxis("Vertical");
+        float throttle = Mathf.Clamp01(Mathf.Abs(inputVertical));
+        float velocidadeReferencia = velocidadeAtual < 0f ? velocidadeMaximaRe : velocidadeMaxima;
+        float speedRatio = velocidadeReferencia > 0.01f ? Mathf.Clamp01(Mathf.Abs(velocidadeAtual) / velocidadeReferencia) : 0f;
         float blend = 1f - Mathf.Exp(-respostaAudio * Time.deltaTime);
 
         float lowVolume = 0f; float midVolume = 0f; float highVolume = 0f; float decelVolume = 0f;
