@@ -14,7 +14,10 @@ public class MovimentoCarro : MonoBehaviour
     [Header("Alinhamento do carro")]
     public float velocidadeAlinhamento = 15f; 
     public float distanciaDoChao = 2.0f;
+    public float alturaSobreChao = 1f;
     public float anguloMaximoChao = 55f;
+    public float velocidadePrenderNoChao = 10f;
+    public float atritoParede = 18f;
     public LayerMask camadaDaPista;          
 
     [Header("Audio")]
@@ -35,6 +38,7 @@ public class MovimentoCarro : MonoBehaviour
     private float velocidadeAtual;
     private bool estaNoChao;
     private bool emColisaoLateral;
+    private Vector3 pontoChao;
     private Vector3 normalChao = Vector3.up;
     private Vector3 normalColisaoLateral;
     private AudioSource lowSource;
@@ -48,6 +52,8 @@ public class MovimentoCarro : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     
         rb.freezeRotation = true; 
+
+        InicializarAlturaSobreChao();
         
         CriarAudio();
     }
@@ -85,6 +91,11 @@ public class MovimentoCarro : MonoBehaviour
 
         AlinharCarro();
 
+        if (emColisaoLateral && estaNoChao)
+        {
+            velocidadeAtual = Mathf.MoveTowards(velocidadeAtual, 0f, atritoParede * Time.fixedDeltaTime);
+        }
+
         Vector3 direcaoMovimento = Vector3.ProjectOnPlane(transform.forward, normalChao);
         if (direcaoMovimento.sqrMagnitude < 0.001f)
         {
@@ -112,6 +123,8 @@ public class MovimentoCarro : MonoBehaviour
         {
             movimentoDirecionado.y = 0f;
         }
+
+        ManterPneuNoChao();
         
         rb.linearVelocity = movimentoDirecionado; 
     }
@@ -128,6 +141,7 @@ public class MovimentoCarro : MonoBehaviour
             if (anguloChao <= anguloMaximoChao)
             {
                 estaNoChao = true;
+                pontoChao = hit.point;
                 normalChao = hit.normal;
                 Quaternion rotacaoAlvo = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
                 transform.rotation = Quaternion.Slerp(transform.rotation, rotacaoAlvo, velocidadeAlinhamento * Time.fixedDeltaTime);
@@ -137,6 +151,29 @@ public class MovimentoCarro : MonoBehaviour
 
         Quaternion rotacaoReta = Quaternion.Euler(0, transform.eulerAngles.y, 0);
         transform.rotation = Quaternion.Slerp(transform.rotation, rotacaoReta, 2f * Time.fixedDeltaTime);
+    }
+
+    private void InicializarAlturaSobreChao()
+    {
+        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, distanciaDoChao, camadaDaPista))
+        {
+            float anguloChao = Vector3.Angle(hit.normal, Vector3.up);
+            if (anguloChao <= anguloMaximoChao)
+            {
+                alturaSobreChao = Mathf.Max(0.05f, hit.distance);
+            }
+        }
+    }
+
+    private void ManterPneuNoChao()
+    {
+        if (!estaNoChao || !emColisaoLateral) return;
+
+        Vector3 posicaoAlvo = pontoChao + (normalChao * alturaSobreChao);
+        Vector3 posicaoAtual = rb.position;
+        Vector3 posicaoCorrigida = Vector3.MoveTowards(posicaoAtual, posicaoAlvo, velocidadePrenderNoChao * Time.fixedDeltaTime);
+
+        rb.MovePosition(posicaoCorrigida);
     }
 
     void OnCollisionEnter(Collision collision)
