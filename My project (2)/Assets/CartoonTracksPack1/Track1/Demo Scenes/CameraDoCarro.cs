@@ -71,7 +71,6 @@ public class CameraVolante : MonoBehaviour
     {
         // Em VR: não faz NADA.
         if (emVR) return;
-        Debug.Log("Late  Update");
         if (Input.GetKeyDown(KeyCode.R))
         {
             rotX = 0f;

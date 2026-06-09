@@ -53,19 +53,38 @@ public class MovimentoCarro : MonoBehaviour
 
     void FixedUpdate()
     {
-        float aceleracao = Input.GetAxis("Vertical");
-        float direcao = Input.GetAxis("Horizontal");
+        float aceleracao;
+        float freio;
+        float direcao;
 
-        if (aceleracao > 0f)
+        if (Logitech.IsLigado())
         {
-            velocidadeAtual += aceleracaoForca * Time.fixedDeltaTime;
-        }
-        else if (aceleracao < 0f)
-        {
-            velocidadeAtual -= freioForca * Time.fixedDeltaTime;
+            aceleracao = Logitech.Acelerador();
+            freio = Logitech.Embreagem(); // embreagem faz papel de freio
         }
         else
         {
+            float vertical = Input.GetAxis("Vertical");
+
+            aceleracao = Mathf.Max(0f, vertical);
+            freio = Mathf.Max(0f, -vertical);
+            //Debug.Log("Freio: " + freio);
+        }
+            direcao = Input.GetAxis("Horizontal");
+
+        if (aceleracao > 0.2f)
+        {
+            //Debug.Log("ACELERANDO");
+            velocidadeAtual += aceleracao * aceleracaoForca * Time.fixedDeltaTime;
+        }
+        else if (freio > 0.2f)
+        {
+            //Debug.Log("freio: "+ freio);
+            velocidadeAtual -= freio * freioForca * Time.fixedDeltaTime;
+        }
+        else
+        {
+            //Debug.Log("SOLTO");
             velocidadeAtual -= resistencia * Time.fixedDeltaTime;
         }
 
@@ -73,17 +92,13 @@ public class MovimentoCarro : MonoBehaviour
 
         if (velocidadeAtual > 0.1f)
         {
-            float fatorVelocidade = velocidadeAtual / velocidadeMaxima;
             float rotacao = direcao * velocidadeCurva * Time.fixedDeltaTime;
-            
             transform.Rotate(transform.up, rotacao, Space.World);
         }
 
         AlinharCarro();
 
-        Vector3 movimentoDirecionado = transform.forward * velocidadeAtual;
-        
-        rb.linearVelocity = movimentoDirecionado; 
+        rb.linearVelocity = transform.forward * velocidadeAtual;
     }
 
     void AlinharCarro()
@@ -132,7 +147,13 @@ public class MovimentoCarro : MonoBehaviour
 
     private void AtualizarAudio()
     {
-        float throttle = Mathf.Clamp01(Input.GetAxis("Vertical"));
+        float throttle;
+
+        if (Logitech.IsLigado())
+            throttle = Logitech.Acelerador();
+        else
+            throttle = Mathf.Clamp01(Input.GetAxis("Vertical"));
+
         float speedRatio = velocidadeMaxima > 0.01f ? Mathf.Clamp01(velocidadeAtual / velocidadeMaxima) : 0f;
         float blend = 1f - Mathf.Exp(-respostaAudio * Time.deltaTime);
 

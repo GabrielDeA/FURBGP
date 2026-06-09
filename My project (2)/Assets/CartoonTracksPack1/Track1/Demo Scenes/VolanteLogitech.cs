@@ -15,7 +15,7 @@ public class VolanteLogitech : MonoBehaviour
 
     void Update()
     {
-        bool logitechLigado = Logitech.Ligado();
+        bool logitechLigado = Logitech.IsLigado();
         if (ScriptTeclado != null)
         {
             ScriptTeclado.enabled = !logitechLigado;
@@ -23,7 +23,7 @@ public class VolanteLogitech : MonoBehaviour
 
         if (logitechLigado)
         {
-            AtualizarRotacao(Logitech.RotacaoVolante());
+            AtualizarRotacao(Logitech.RotacaoVolante(RotacaoMaxima));
         }
         
     }
@@ -32,6 +32,7 @@ public class VolanteLogitech : MonoBehaviour
     {
         Logitech.Desligar();
     }
+
 
     private void AtualizarRotacao(float novaRotacao)
     {

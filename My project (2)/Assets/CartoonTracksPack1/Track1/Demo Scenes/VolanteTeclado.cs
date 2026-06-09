@@ -12,13 +12,16 @@ public class VolanteTeclado : MonoBehaviour
     private static readonly int VIRANDO_PARA_ESQUERDA = 1;
     private static readonly int VIRANDO_PARA_DIREITA = -1;
 
+    private bool isLogitech = false;
+
     void Start()
     {
-        
+
     }
 
     void Update()
     {
+
         int direcao = ObterDirecao();
         if (direcao != VOLANTE_PARADO)
         {
