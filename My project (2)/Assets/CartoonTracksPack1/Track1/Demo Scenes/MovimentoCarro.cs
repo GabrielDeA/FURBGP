@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -7,7 +8,7 @@ public class MovimentoCarro : MonoBehaviour
     public float velocidadeMaxima = 80f;
     public float velocidadeMaximaRe = 25f;
     public float aceleracaoForca = 22f;
-    public float freioForca = 50f;
+    public float freioForca = 100f;
     public float resistencia = 20f;
     public float velocidadeCurva = 100f;
 
@@ -72,7 +73,28 @@ public class MovimentoCarro : MonoBehaviour
         if (Logitech.IsLigado())
         {
             aceleracao = Logitech.Acelerador();
+            Debug.Log("Acelerador: " + aceleracao);
             freio = Logitech.Embreagem(); // embreagem faz papel de freio
+            Debug.Log("Freio: " + freio);
+
+            if (aceleracao > 0.1f)
+            {
+                float velocidadeAlvo = aceleracao > 0f ? velocidadeMaxima : -velocidadeMaximaRe;
+                float forca = aceleracao * aceleracaoForca;
+                velocidadeAtual = Mathf.MoveTowards(velocidadeAtual, velocidadeAlvo, Mathf.Abs(aceleracao) * forca * Time.fixedDeltaTime);
+            }
+            else if (freio > 0.1f)
+            {
+                float velocidadeAlvo = 0f;
+                float forca = freio * freioForca;
+                velocidadeAtual = Mathf.MoveTowards(velocidadeAtual, velocidadeAlvo, Mathf.Abs(freio) * forca * Time.fixedDeltaTime);
+            }
+            else
+            {
+                velocidadeAtual = Mathf.MoveTowards(velocidadeAtual, 0f, resistencia * Time.fixedDeltaTime);
+            }
+            direcao = -Logitech.RotacaoVolante(450f) / 500;
+
         }
         else
         {
@@ -80,19 +102,18 @@ public class MovimentoCarro : MonoBehaviour
 
             aceleracao = Mathf.Max(0f, vertical);
             freio = Mathf.Max(0f, -vertical);
-            //Debug.Log("Freio: " + freio);
-        }
             direcao = Input.GetAxis("Horizontal");
 
-        if (Mathf.Abs(aceleracao) > 0.01f)
-        {
-            float velocidadeAlvo = aceleracao > 0f ? velocidadeMaxima : -velocidadeMaximaRe;
-            float forca = aceleracao > 0f ? aceleracaoForca : freioForca;
-            velocidadeAtual = Mathf.MoveTowards(velocidadeAtual, velocidadeAlvo, Mathf.Abs(aceleracao) * forca * Time.fixedDeltaTime);
-        }
-        else
-        {
-            velocidadeAtual = Mathf.MoveTowards(velocidadeAtual, 0f, resistencia * Time.fixedDeltaTime);
+            if (Mathf.Abs(aceleracao) > 0.01f)
+            {
+                float velocidadeAlvo = aceleracao > 0f ? velocidadeMaxima : -velocidadeMaximaRe;
+                float forca = aceleracao > 0f ? aceleracaoForca : freioForca;
+                velocidadeAtual = Mathf.MoveTowards(velocidadeAtual, velocidadeAlvo, Mathf.Abs(aceleracao) * forca * Time.fixedDeltaTime);
+            }
+            else
+            {
+                velocidadeAtual = Mathf.MoveTowards(velocidadeAtual, 0f, resistencia * Time.fixedDeltaTime);
+            }
         }
 
         velocidadeAtual = Mathf.Clamp(velocidadeAtual, -velocidadeMaximaRe, velocidadeMaxima);
@@ -100,7 +121,7 @@ public class MovimentoCarro : MonoBehaviour
         if (Mathf.Abs(velocidadeAtual) > 0.1f)
         {
             float sentidoDirecao = velocidadeAtual < 0f ? -1f : 1f;
-            float rotacao = direcao * velocidadeCurva * sentidoDirecao * Time.fixedDeltaTime;
+            float rotacao = direcao * (velocidadeCurva)* sentidoDirecao * Time.fixedDeltaTime;
             
             transform.Rotate(transform.up, rotacao, Space.World);
         }
